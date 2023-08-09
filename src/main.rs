@@ -1,6 +1,7 @@
 use actix_files as fs;
 use actix_web::{ 
     post,
+    web,
     App, 
     HttpServer,
     HttpResponse,
@@ -9,8 +10,7 @@ use actix_web::{
 use actix_web::dev::{ ServiceRequest, ServiceResponse, fn_service };
 use std::process::Command;
 
-#[post("/update")]
-async fn update() -> impl Responder {
+async fn update(body: String) -> impl Responder {
     let update_script = std::env::var("JTY_WEBSITE_UPDATE_SCRIPT")
         .unwrap_or(String::from("ls"));
     let output = Command::new(update_script)
@@ -19,7 +19,7 @@ async fn update() -> impl Responder {
         .and_then(|o| String::from_utf8(o.stdout).ok());
 
     match output {
-        Some(s) => HttpResponse::Ok().body(format!("Success: {}", s)),
+        Some(s) => HttpResponse::Ok().body(format!("Success: {}\n{}", s, body)),
         None => HttpResponse::InternalServerError().body("Unsuccessful."),
     }
 }
@@ -40,7 +40,10 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .service(update)
+            .service(
+                web::resource("/update")
+                    .route(web::post().to(update))
+            )
             .service(
                 fs::Files::new("/static", static_path.clone())
                     .show_files_listing()
