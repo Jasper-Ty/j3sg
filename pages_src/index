@@ -1,0 +1,6 @@
+TITLE = "jty"
+
+HEADER = "<h1>Jasper Ty</h1>"
+
+MAIN = "<h2>About</h2>
+<p>I'm a senior Computer Engineering major at Drexel University</p>"

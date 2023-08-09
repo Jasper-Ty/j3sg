@@ -1,5 +1,5 @@
 [package]
-name = "jty-website"
+name = "jty_website"
 version = "0.1.0"
 edition = "2021"
 

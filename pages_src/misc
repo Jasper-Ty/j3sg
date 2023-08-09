@@ -1,0 +1,5 @@
+TITLE = "jty - Miscellaneous"
+
+HEADER = "<h1>Miscellaneous</h1>"
+
+MAIN = "<p>Collection of random things.</p>"
