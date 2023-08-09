@@ -10,6 +10,7 @@ use actix_web::{
 use actix_web::dev::{ ServiceRequest, ServiceResponse, fn_service };
 use std::process::Command;
 
+#[post("/update")]
 async fn update(body: String) -> impl Responder {
     let update_script = std::env::var("JTY_WEBSITE_UPDATE_SCRIPT")
         .unwrap_or(String::from("ls"));
@@ -40,10 +41,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .service(
-                web::resource("/update")
-                    .route(web::post().to(update))
-            )
+            .service(update)
             .service(
                 fs::Files::new("/static", static_path.clone())
                     .show_files_listing()
