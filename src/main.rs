@@ -10,15 +10,18 @@ use actix_web::dev::{ ServiceRequest, ServiceResponse, fn_service };
 use std::process::Command;
 
 #[post("/update")]
-async fn update(req_body: String) -> impl Responder {
+async fn update() -> impl Responder {
     let update_script = std::env::var("JTY_WEBSITE_UPDATE_SCRIPT")
         .unwrap_or(String::from("ls"));
-    Command::new(update_script)
+    let output = Command::new(update_script)
         .output()
         .ok() 
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|o| HttpResponse::Ok().body(format!("Success. Output: {}", o)))
-        .unwrap_or(HttpResponse::InternalServerError().body("Unsuccessful"))
+        .and_then(|o| String::from_utf8(o.stdout).ok());
+
+    match output {
+        Some(s) => HttpResponse::Ok().body(format!("Success: {}", s)),
+        None => HttpResponse::InternalServerError().body("Unsuccessful."),
+    }
 }
 
 #[actix_web::main]
