@@ -30,14 +30,16 @@ async fn main() -> std::io::Result<()> {
     let bind_addr = std::env::var("JTY_WEBSITE_BIND_ADDR")
         .map(|s| (s, 80))
         .unwrap_or(("127.0.0.1".to_string(), 3000));
-    println!("Listening on {}:{}", bind_addr.0, bind_addr.1);
 
     let static_path = std::env::var("JTY_WEBSITE_STATIC_PATH")
         .unwrap_or(String::from("./static"));
     let pages_path = std::env::var("JTY_WEBSITE_PAGES_PATH")
         .unwrap_or(String::from("./pages"));
+
+    println!("Listening on {}:{}", bind_addr.0, bind_addr.1);
     println!("Static directory at {}", static_path);
     println!("Pages directory at {}", pages_path);
+
 
     HttpServer::new(move || {
         App::new()
