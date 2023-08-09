@@ -10,7 +10,7 @@ use actix_web::dev::{ ServiceRequest, ServiceResponse, fn_service };
 use std::process::Command;
 
 #[post("/update")]
-async fn update() -> impl Responder {
+async fn update(req_body: String) -> impl Responder {
     let update_script = std::env::var("JTY_WEBSITE_UPDATE_SCRIPT")
         .unwrap_or(String::from("ls"));
     Command::new(update_script)
