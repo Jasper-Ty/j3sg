@@ -21,28 +21,6 @@ macro_rules! env_or {
     };
 }
 
-
-/// Runs a script that is supposed to pull changes, 
-/// rebuild and restart the server.
-///
-/// I have a GitHub Webhook that hits this.
-///
-/// TODO: Secure this using GitHub's Webhook secret.
-#[post("/update")]
-async fn update() -> impl Responder {
-    let update_script = std::env::var("JTY_WEBSITE_UPDATE_SCRIPT")
-        .unwrap_or(String::from("ls"));
-    let output = Command::new(update_script)
-        .output()
-        .ok() 
-        .and_then(|o| String::from_utf8(o.stdout).ok());
-
-    match output {
-        Some(s) => HttpResponse::Ok().body(format!("Success\nOutput:\n{}", s, )),
-        None => HttpResponse::InternalServerError().body("Unsuccessful."),
-    }
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let bind_addr = env_or!("JTY_WEBSITE_BIND_ADDR", "127.0.0.1:3000");
@@ -64,7 +42,6 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .service(update)
             .service(
                 fs::Files::new("/static", &static_path[..])
                     .show_files_listing()
