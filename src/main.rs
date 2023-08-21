@@ -1,57 +1,60 @@
 use actix_files as fs;
-use actix_web::{ 
-    App, 
-    HttpServer,
-};
+use actix_web::{ Error, get, App, HttpServer };
 use actix_web::dev::{ ServiceRequest, ServiceResponse, fn_service };
 use openssl::ssl::{ SslAcceptor, SslFiletype, SslMethod };
-use tera::{ Tera, Context };
 
-/// Gets env variable or a default value if it doesn't exist
-/// 
-/// Returns a [`String`]
+use lazy_static::lazy_static;
+
+#[derive(Clone)]
+pub struct TlsPair {
+    pub key: String,
+    pub cert: String,
+}
 macro_rules! env_or {
     ($key:expr, $default:expr) => {
         std::env::var($key).unwrap_or(String::from($default))
     };
 }
+lazy_static! {
+    pub static ref STATIC_PATH: String = env_or!("JTY_WEBSITE_STATIC_PATH", "./static");
+    pub static ref PAGES_PATH: String = env_or!("JTY_WEBSITE_PAGES_PATH", "./pages");
+    pub static ref BIND_ADDR: String = env_or!("JTY_WEBSITE_BIND_ADDR", "127.0.0.1:5000");
+    pub static ref TLS_PAIR: Option<TlsPair> = std::env::var("JTY_WEBSITE_TLS_KEY")
+    .and_then(|key| std::env::var("JTY_WEBSITE_TLS_CERT")
+              .map(|cert| TlsPair { key, cert }))
+    .ok();
+}
+
+#[get("/index")]
+async fn index() -> Result<fs::NamedFile, Error> {
+    let file = fs::NamedFile::open("./pages/index.html")?;
+    Ok(file.use_last_modified(true))
+}
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let bind_addr = env_or!("JTY_WEBSITE_BIND_ADDR", "127.0.0.1:5000");
-    let static_path = env_or!("JTY_WEBSITE_STATIC_PATH", "./static");
-    let pages_path = env_or!("JTY_WEBSITE_PAGES_PATH", "./pages");
 
-    let tera = match Tera::new("templates/*.html") {
-        Ok(t) => t,
-        Err(e) => {
-            println!("Parsing error(s): {}", e);
-            ::std::process::exit(1);
-        }
-    };
-
-    let mut context = Context::new();
-    context.insert("page_title", "Jasper Ty");
-    context.insert("header_content", "Header");
-    context.insert("main_content", "Main");
-    let index = tera.render("index.html", &context).unwrap();
-    println!("{}", index);
+    println!("Listening on {}", &BIND_ADDR[..]);
+    println!("Static directory at {}", &STATIC_PATH[..]);
+    println!("Pages directory at {}", &PAGES_PATH[..]);
+    if let Some(TlsPair { ref key, ref cert }) = *TLS_PAIR { 
+        println!("Using TLS key at {}", key);
+        println!("Using TLS cert at {}", cert);
+    }
 
 
-    println!("Listening on {}", bind_addr);
-    println!("Static directory at {}", static_path);
-    println!("Pages directory at {}", pages_path);
-
-
+    // TODO: move this into a factory
     let http_server = HttpServer::new(move || {
         App::new()
+            .service(index)
             .service(
-                fs::Files::new("/static", &static_path[..])
+                fs::Files::new("/static", &STATIC_PATH[..])
                     .show_files_listing()
                     .index_file("index.html")
             )
             .service(
-                fs::Files::new("/", &pages_path[..])
+                fs::Files::new("/", &PAGES_PATH[..])
                     .index_file("index.html")
                     .default_handler(fn_service(|req: ServiceRequest| async {
                         let (req, _) = req.into_parts();
@@ -62,21 +65,18 @@ async fn main() -> std::io::Result<()> {
             )
     });
 
-
-    if let Ok(tls_key) = std::env::var("JTY_WEBSITE_TLS_KEY") {
-        let tls_cert = std::env::var("JTY_WEBSITE_TLS_CERT").unwrap();
-        println!("Using TLS key/cert {}/{}", tls_key, tls_cert);
+    if let Some(TlsPair { ref key, ref cert }) = *TLS_PAIR {
         let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         builder
-            .set_private_key_file(tls_key, SslFiletype::PEM)
+            .set_private_key_file(key, SslFiletype::PEM)
             .unwrap();
-        builder.set_certificate_chain_file(tls_cert).unwrap();
+        builder.set_certificate_chain_file(cert).unwrap();
 
-        http_server.bind_openssl(bind_addr, builder)?
+        http_server.bind_openssl(&BIND_ADDR[..], builder)?
             .run()
             .await
     } else {
-        http_server.bind(bind_addr)?
+        http_server.bind(&BIND_ADDR[..])?
             .run()
             .await
     }

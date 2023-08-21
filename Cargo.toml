@@ -1,5 +1,5 @@
 [package]
-name = "jty-website"
+name = "jty_website"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,3 +13,6 @@ openssl = { version = "0.10" }
 
 # Template engine
 tera = "1"
+
+# Utils
+lazy_static = "1.4.0"
