@@ -1,14 +1,19 @@
 pub mod routes;
 
-pub mod reload {
-
-}
+pub mod reload;
 
 /// Holds application state
 pub mod state {
     use std::sync::Mutex;
+    use actix::Addr;
     use tera::Tera;
     use crate::config::Config;
+    use crate::reload::ReloadActor;
+    use lazy_static::lazy_static;
+
+    lazy_static! {
+        pub static ref ADDRS: Mutex<Vec<Addr<ReloadActor>>> = Mutex::new(Vec::new());
+    }
 
     pub struct AppState {
         pub tera: Mutex<Tera>,

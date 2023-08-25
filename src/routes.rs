@@ -1,4 +1,4 @@
-use actix_web::{ web, get, HttpResponse, http::header::ContentType };
+use actix_web::{ web, get, HttpResponse, http::header::ContentType};
 use tera::Context;
 
 use crate::{config::Config, state::AppState};
@@ -27,14 +27,6 @@ template_route!("/notes", "notes.html", notes);
 template_route!("/blog", "blog.html", blog);
 template_route!("/misc", "misc.html", misc);
 
-#[get("/reload")]
-async fn reload(data: web::Data<AppState>) -> String {
-    let mut tera = data.tera.lock().unwrap();
-    match (*tera).full_reload() {
-        Ok(_) => String::from("reloaded"),
-        Err(e) => e.to_string(),
-    }
-}
 
 #[get("/config")]
 async fn config() -> String {

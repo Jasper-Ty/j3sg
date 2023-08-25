@@ -5,15 +5,15 @@ use actix_web::{ web, App, HttpServer };
 use openssl::ssl::{ SslAcceptor, SslFiletype, SslMethod };
 use notify::{ Watcher, RecursiveMode };
 
-use jty_website::state::AppState;
+use jty_website::state::{AppState, ADDRS};
 use jty_website::config::Config;
 use jty_website::routes;
+use jty_website::reload::{reload, ReloadMessage};
 
 #[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
     let dev_mode = args.iter().any(|s| s == "-D" || s == "--dev");
-
 
     let Config {
         pages_path,
@@ -21,8 +21,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         bind_addr,
         tls_pair
     } = Config::get();
-
-
 
     if dev_mode {
         println!("Running server in dev mode.");
@@ -44,9 +42,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if event.kind.is_modify() {
             println!("Change detected. Reloading...");
             let mut tera = watcher_data.tera.lock().unwrap();
-            
+ 
             match (*tera).full_reload() {
-                Ok(_) => println!("Successfully reloaded"),
+                Ok(_) => {
+                    println!("Successfully reloaded");
+                    let addrs = ADDRS.lock().unwrap();
+                    for addr in addrs.iter() {
+                        addr.do_send(ReloadMessage);
+                        println!("Sent message {:?}", addr);
+                    }
+                },
                 Err(e) => println!("{}", e.to_string()),
             };
         }
@@ -57,7 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let http_server = HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
-            .service(routes::reload)
+            .service(reload)
             .service(routes::index)
             .service(routes::bio)
             .service(routes::projects)
