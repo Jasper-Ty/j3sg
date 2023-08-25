@@ -13,6 +13,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="/static/stylesheet.css">
+
+        {% if dev_mode %}
+        <script src="/static/reload.js"></script>
+        {% endif %}
     </head>
 
     <body>

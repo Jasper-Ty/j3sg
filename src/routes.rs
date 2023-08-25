@@ -8,7 +8,8 @@ macro_rules! template_route {
         #[get($route)]
         async fn $name(data: web::Data<AppState>) -> HttpResponse {
             let tera = data.tera.lock().unwrap();
-            let context = Context::new();
+            let mut context = Context::new();
+            context.insert("dev_mode", &data.dev_mode);
             let rendered_html = tera.render($template, &context)
                 .unwrap_or_else(|e| e.to_string());
             HttpResponse::Ok()

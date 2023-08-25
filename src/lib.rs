@@ -12,9 +12,10 @@ pub mod state {
 
     pub struct AppState {
         pub tera: Mutex<Tera>,
+        pub dev_mode: bool,
     }
     impl AppState {
-        pub fn new() -> Self {
+        pub fn new(dev_mode: bool) -> Self {
             let Config { pages_path, .. } = Config::get();
             let glob = format!("{}/**/*.html", pages_path);
             let mut tera = Tera::new(&glob).expect("Should be able to compile templates");
@@ -22,7 +23,8 @@ pub mod state {
 
             let tera = Mutex::new(tera);
             AppState {
-                tera
+                tera,
+                dev_mode
             }
         }
     }

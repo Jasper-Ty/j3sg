@@ -23,8 +23,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } = Config::get();
 
 
-    std::env::set_var("RUST_LOG", "debug");
 
+    if dev_mode {
+        println!("Running server in dev mode.");
+    }
     println!("Listening on {}", bind_addr);
     println!("Static directory at {}", static_path);
     println!("Pages directory at {}", pages_path);
@@ -32,8 +34,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Using TLS key at {}", key);
         println!("Using TLS cert at {}", cert);
     }
+    
 
-    let data = web::Data::new(AppState::new());
+    let data = web::Data::new(AppState::new(dev_mode));
 
     let watcher_data = data.clone();
     let mut watcher = notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
