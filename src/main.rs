@@ -11,6 +11,10 @@ use jty_website::routes;
 
 #[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let args: Vec<String> = std::env::args().collect();
+    let dev_mode = args.iter().any(|s| s == "-D" || s == "--dev");
+
+
     let Config {
         pages_path,
         static_path,
