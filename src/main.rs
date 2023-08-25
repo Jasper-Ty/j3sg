@@ -1,19 +1,23 @@
+use std::error::Error;
+
 use actix_files as fs;
 use actix_web::{ web, App, HttpServer };
 use openssl::ssl::{ SslAcceptor, SslFiletype, SslMethod };
+use notify::{ Watcher, RecursiveMode };
 
 use jty_website::state::AppState;
 use jty_website::config::Config;
 use jty_website::routes;
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<(), Box<dyn Error>> {
     let Config {
         pages_path,
         static_path,
         bind_addr,
         tls_pair
     } = Config::get();
+
 
     std::env::set_var("RUST_LOG", "debug");
 
@@ -27,9 +31,26 @@ async fn main() -> std::io::Result<()> {
 
     let data = web::Data::new(AppState::new());
 
+    let watcher_data = data.clone();
+    let mut watcher = notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
+        let event = res.unwrap();    
+        if event.kind.is_modify() {
+            println!("Change detected. Reloading...");
+            let mut tera = watcher_data.tera.lock().unwrap();
+            
+            match (*tera).full_reload() {
+                Ok(_) => println!("Successfully reloaded"),
+                Err(e) => println!("{}", e.to_string()),
+            };
+        }
+    })?;
+
+    watcher.watch(std::path::Path::new(pages_path), RecursiveMode::Recursive)?;
+
     let http_server = HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
+            .service(routes::reload)
             .service(routes::index)
             .service(routes::bio)
             .service(routes::projects)
@@ -53,10 +74,12 @@ async fn main() -> std::io::Result<()> {
 
         http_server.bind_openssl(bind_addr, builder)?
             .run()
-            .await
+            .await?;
     } else {
         http_server.bind(bind_addr)?
             .run()
-            .await
+            .await?;
     }
+
+    Ok(())
 }
