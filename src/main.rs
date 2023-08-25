@@ -1,66 +1,59 @@
-use std::path::Path;
-
 use actix_files as fs;
-use actix_web::{ Error, get, App, HttpServer };
-use actix_web::dev::{ ServiceRequest, ServiceResponse, fn_service };
+use actix_web::{ web, App, HttpServer };
 use openssl::ssl::{ SslAcceptor, SslFiletype, SslMethod };
 
-use jty_website::env;
-
-#[get("/index")]
-async fn index() -> Result<fs::NamedFile, Error> {
-    let path = Path::new(env!("OUT_DIR"))
-        .join("pages")
-        .join("index.html");
-    let file = fs::NamedFile::open(path)?;
-    Ok(file.use_last_modified(true))
-}
-
+use jty_website::state::AppState;
+use jty_website::config::Config;
+use jty_website::routes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let Config {
+        pages_path,
+        static_path,
+        bind_addr,
+        tls_pair
+    } = Config::get();
 
-    println!("Listening on {}", &env::BIND_ADDR[..]);
-    println!("Static directory at {}", &env::STATIC_PATH[..]);
-    println!("Pages directory at {}", &env::PAGES_PATH[..]);
-    if let Some(env::TlsPair { ref key, ref cert }) = *env::TLS_PAIR { 
+    std::env::set_var("RUST_LOG", "debug");
+
+    println!("Listening on {}", bind_addr);
+    println!("Static directory at {}", static_path);
+    println!("Pages directory at {}", pages_path);
+    if let Some((key, cert)) = tls_pair { 
         println!("Using TLS key at {}", key);
         println!("Using TLS cert at {}", cert);
     }
 
-    // TODO: move this into a factory
     let http_server = HttpServer::new(move || {
         App::new()
-            .service(index)
+            .app_data(web::Data::new(AppState::new()))
+            .service(routes::index)
+            .service(routes::bio)
+            .service(routes::projects)
+            .service(routes::art)
+            .service(routes::notes)
+            .service(routes::blog)
+            .service(routes::misc)
             .service(
-                fs::Files::new("/static", &env::STATIC_PATH[..])
+                fs::Files::new("/static", static_path)
                     .show_files_listing()
                     .index_file("index.html")
             )
-            .service(
-                fs::Files::new("/", &env::PAGES_PATH[..])
-                    .index_file("index.html")
-                    .default_handler(fn_service(|req: ServiceRequest| async {
-                        let (req, _) = req.into_parts();
-                        let file = fs::NamedFile::open_async("./pages/404.html").await?;
-                        let res = file.into_response(&req);
-                        Ok(ServiceResponse::new(req, res))
-                    }))
-            )
     });
 
-    if let Some(env::TlsPair { ref key, ref cert }) = *env::TLS_PAIR {
+    if let Some((key, cert)) = tls_pair {
         let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         builder
             .set_private_key_file(key, SslFiletype::PEM)
             .unwrap();
         builder.set_certificate_chain_file(cert).unwrap();
 
-        http_server.bind_openssl(&env::BIND_ADDR[..], builder)?
+        http_server.bind_openssl(bind_addr, builder)?
             .run()
             .await
     } else {
-        http_server.bind(&env::BIND_ADDR[..])?
+        http_server.bind(bind_addr)?
             .run()
             .await
     }

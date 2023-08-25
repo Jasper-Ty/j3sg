@@ -1,35 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>jty - Bio</title>
+{% extends "base-1.html" %}
 
-        <meta name="author" content="Jasper Ty">
-        <meta name="description" content="Personal website / portfolio / blog for Jasper Ty">
+{% block page_title %}
+Bio
+{% endblock page_title %}
 
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="/static/stylesheet.css">
-    </head>
+{% block header %}
+<h1>Bio</h1>
+{% endblock header %}
 
-    <body>
-        <header>
-            <h1>Bio</h1>
-        </header>
-
-        <main>
-            <p>I grew up in both the Philippines and Saudi Arabia. Currently, I'm based in Philadelphia, as both a Computer Engineering student at Drexel University and a Software Developer at MOD.</p>
+{% block main %}
+<p>I grew up in both the Philippines and Saudi Arabia. I'm currently based in Philadelphia, as both a Computer Engineering student at Drexel University and a Software Developer at MOD.</p>
 
 <p>I'm planning to pursue an academic career in pure math. I've always had a very strong passion for it, and spent much of my free time in college studying math. I'm particularly interested in the intersection between math and computer science.</p>
-        </main>
-
-        <nav>
-            <h2>Navigation</h2>
-            <a href="/bio.html">Bio</a> 
-            <a href="/projects.html">Projects</a> 
-            <a href="/art.html">Art</a> 
-            <a href="/notes.html">Notes</a>
-            <a href="/blog.html">Blog</a> 
-            <a href="/misc.html">Misc.</a>
-        </nav> 
-    </body>
-</html>
+{% endblock main %}

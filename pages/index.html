@@ -1,34 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>jty</title>
+{% extends "base-1.html" %}
 
-        <meta name="author" content="Jasper Ty">
-        <meta name="description" content="Personal website / portfolio / blog for Jasper Ty">
+{% block page_title %}
+Jasper Ty
+{% endblock page_title %}
 
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="/static/stylesheet.css">
-    </head>
+{% block header %}
+<h1>Jasper Ty</h1>
+{% endblock header %}
 
-    <body>
-        <header>
-            <h1>Jasper Ty</h1>
-        </header>
+{% block main %}
+<h2>About</h2>
+<p>I'm a senior Computer Engineering student at Drexel University.</p>
 
-        <main>
-            <h2>About</h2>
-<p>I'm a senior Computer Engineering major at Drexel University</p>
-        </main>
+<p>I program and study a lot of math in my free time, and I also love to draw and produce music.</p>
 
-        <nav>
-            <h2>Navigation</h2>
-            <a href="/bio.html">Bio</a> 
-            <a href="/projects.html">Projects</a> 
-            <a href="/art.html">Art</a> 
-            <a href="/notes.html">Notes</a>
-            <a href="/blog.html">Blog</a> 
-            <a href="/misc.html">Misc.</a>
-        </nav> 
-    </body>
-</html>
+<h2>My coordinates in various spaces</h2>
+<ul>
+<li>mastodon: (AT) jasperty (AT) mathstodon.xyz</li>
+<li>email: jasperty2 (AT) gmail (DOT) net</li>
+<li>github: Jasper-Ty</li>
+</ul>
+{% endblock main %}
