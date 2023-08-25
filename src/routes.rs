@@ -7,7 +7,7 @@ macro_rules! template_route {
     ($route: expr, $template: expr, $name: ident) => {
         #[get($route)]
         async fn $name(data: web::Data<AppState>) -> HttpResponse {
-            let tera = &data.tera;
+            let tera = data.tera.lock().unwrap();
             let context = Context::new();
             let rendered_html = tera.render($template, &context)
                 .unwrap_or_else(|e| e.to_string());

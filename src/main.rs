@@ -25,9 +25,11 @@ async fn main() -> std::io::Result<()> {
         println!("Using TLS cert at {}", cert);
     }
 
+    let data = web::Data::new(AppState::new());
+
     let http_server = HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(AppState::new()))
+            .app_data(data.clone())
             .service(routes::index)
             .service(routes::bio)
             .service(routes::projects)

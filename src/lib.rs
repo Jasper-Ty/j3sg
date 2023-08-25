@@ -2,11 +2,12 @@ pub mod routes;
 
 /// Holds application state
 pub mod state {
+    use std::sync::Mutex;
     use tera::Tera;
     use crate::config::Config;
 
     pub struct AppState {
-        pub tera: Tera,
+        pub tera: Mutex<Tera>,
     }
     impl AppState {
         pub fn new() -> Self {
@@ -14,6 +15,8 @@ pub mod state {
             let glob = format!("{}/**/*.html", pages_path);
             let mut tera = Tera::new(&glob).expect("Should be able to compile templates");
             tera.autoescape_on(vec![".html", ".sql"]);
+
+            let tera = Mutex::new(tera);
             AppState {
                 tera
             }
