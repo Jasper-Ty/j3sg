@@ -8,5 +8,8 @@ It's (maybe) up at [jasperty.net](https://jasperty.net).
 
 ## TODO
 
-- Fill in a good bio
-- Proper templates with Tera
+- [ ] Fill in a good bio 
+- [ ] Projects page
+- [x] Proper templates with Tera
+- [x] Hot reloading
+- [x] Use `notify_debouncer_mini`
