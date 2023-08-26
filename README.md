@@ -12,4 +12,4 @@ It's (maybe) up at [jasperty.net](https://jasperty.net).
 - [ ] Projects page
 - [x] Proper templates with Tera
 - [x] Hot reloading
-- [x] Use `notify_debouncer_mini`
+- [ ] Use `notify_debouncer_mini`
