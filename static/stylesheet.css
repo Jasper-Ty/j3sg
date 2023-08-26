@@ -21,7 +21,8 @@
 }
 
 body {
-    margin: 40px auto;
+    margin: auto;
+    padding: 40px;
     max-width: 600px;
     line-height: 1.6;
     font-family: 'mononoki-regular', monospace; 
@@ -32,8 +33,18 @@ body {
 
 h1, h2, h3 {
     line-height: 1.2;
-}
-
-h1 {
     font-family: 'mononoki-bold';
 }
+
+a {
+    color: var(--main-fg-color);
+}
+
+hr {
+    border: 1px solid var(--main-fg-color);
+}
+
+.imglink {
+    line-height: 0; 
+}
+

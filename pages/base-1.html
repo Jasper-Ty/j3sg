@@ -15,11 +15,22 @@
         <link rel="stylesheet" href="/static/stylesheet.css">
 
         {% if dev_mode %}
-        <script src="/static/reload.js"></script>
+        <script src="/static/script/reload.js"></script>
         {% endif %}
     </head>
 
     <body>
+        <nav>
+            <h1>jasper ty</h1>
+            {% block nav %}
+            <a href="/">Home</a> 
+            <a href="/projects">Projects</a> 
+            <a href="/art">Art</a> 
+            <a href="/music">Music</a> 
+            <a href="/notes">Notes</a>
+            <a href="/blog">Blog</a> 
+            {% endblock nav %}
+        </nav> 
         <header>
             {% block header %}
             [[ HEADER ]]
@@ -32,17 +43,5 @@
             {% endblock main%}
         </main>
 
-        <nav>
-            {% block nav %}
-            <h2>Navigation</h2>
-            <a href="/">Home</a> 
-            <a href="/bio">Bio</a> 
-            <a href="/projects">Projects</a> 
-            <a href="/art">Art</a> 
-            <a href="/notes">Notes</a>
-            <a href="/blog">Blog</a> 
-            <a href="/misc">Misc.</a>
-            {% endblock nav %}
-        </nav> 
     </body>
 </html>
