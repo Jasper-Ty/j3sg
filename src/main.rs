@@ -23,7 +23,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } = Config::get();
 
     if dev_mode {
-        println!("Running server in dev mode.");
+        println!("Running jty-website in dev mode.");
+    } else {
+        println!("Running jty-website.");
     }
     println!("Listening on {}", bind_addr);
     println!("Static directory at {}", static_path);
@@ -32,7 +34,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Using TLS key at {}", key);
         println!("Using TLS cert at {}", cert);
     }
-    
 
     let data = web::Data::new(AppState::new(dev_mode));
 
@@ -71,7 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
     });
 
-    if let Some((key, cert)) = tls_pair {
+    let http_server = if let Some((key, cert)) = tls_pair {
         let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         builder
             .set_private_key_file(key, SslFiletype::PEM)
@@ -79,13 +80,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         builder.set_certificate_chain_file(cert).unwrap();
 
         http_server.bind_openssl(bind_addr, builder)?
-            .run()
-            .await?;
     } else {
         http_server.bind(bind_addr)?
-            .run()
-            .await?;
-    }
+    };
+
+    http_server
+        .run()
+        .await?;
 
     Ok(())
 }
