@@ -1,7 +1,7 @@
 use actix_web::{ web, get, HttpResponse, http::header::ContentType};
 use tera::Context;
 
-use crate::{config::Config, state::AppState};
+use crate::state::AppState;
 
 macro_rules! template_route {
     ($route: expr, $template: expr, $name: ident) => {
@@ -10,6 +10,7 @@ macro_rules! template_route {
             let tera = data.tera.lock().unwrap();
             let mut context = Context::new();
             context.insert("dev_mode", &data.dev_mode);
+
             let rendered_html = tera.render($template, &context)
                 .unwrap_or_else(|e| e.to_string());
             HttpResponse::Ok()
@@ -27,9 +28,12 @@ template_route!("/notes", "notes.html", notes);
 template_route!("/blog", "blog.html", blog);
 template_route!("/misc", "misc.html", misc);
 
-
-#[get("/config")]
-async fn config() -> String {
-    let Config { pages_path, static_path, bind_addr, .. } = Config::get();
-    format!("{} {} {}", pages_path, static_path, bind_addr)
+pub fn config(cfg: &mut web::ServiceConfig) {
+    cfg.service(index)
+        .service(bio)
+        .service(projects)
+        .service(art)
+        .service(notes)
+        .service(blog)
+        .service(misc);
 }

@@ -62,14 +62,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let http_server = HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
+            .configure(routes::config)
             .service(reload)
-            .service(routes::index)
-            .service(routes::bio)
-            .service(routes::projects)
-            .service(routes::art)
-            .service(routes::notes)
-            .service(routes::blog)
-            .service(routes::misc)
             .service(
                 fs::Files::new("/static", static_path)
                     .show_files_listing()
