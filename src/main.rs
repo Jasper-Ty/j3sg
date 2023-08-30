@@ -5,15 +5,20 @@ use actix_web::{ web, App, HttpServer };
 use openssl::ssl::{ SslAcceptor, SslFiletype, SslMethod };
 use notify::{ Watcher, RecursiveMode };
 
-use jty_website::state::{AppState, ADDRS};
+use jty_website::state::{ AppState, ADDRS };
 use jty_website::config::Config;
 use jty_website::routes;
-use jty_website::reload::{reload, ReloadMessage};
+use jty_website::reload::{ reload, ReloadMessage };
 
 #[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
     let dev_mode = args.iter().any(|s| s == "-D" || s == "--dev");
+    if dev_mode {
+        println!("Running jty-website in dev mode.");
+    } else {
+        println!("Running jty-website.");
+    }
 
     let Config {
         pages_path,
@@ -22,11 +27,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         tls_pair
     } = Config::get();
 
-    if dev_mode {
-        println!("Running jty-website in dev mode.");
-    } else {
-        println!("Running jty-website.");
-    }
     println!("Listening on {}", bind_addr);
     println!("Static directory at {}", static_path);
     println!("Pages directory at {}", pages_path);
@@ -79,10 +79,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
         builder.set_certificate_chain_file(cert).unwrap();
 
-        http_server.bind_openssl(bind_addr, builder)?
+        http_server.bind_openssl(bind_addr, builder)
     } else {
-        http_server.bind(bind_addr)?
-    };
+        http_server.bind(bind_addr)
+    }?;
 
     http_server
         .run()
