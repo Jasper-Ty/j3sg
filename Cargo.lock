@@ -1002,6 +1002,7 @@ dependencies = [
  "actix-web-actors",
  "env_logger",
  "lazy_static",
+ "log",
  "notify",
  "openssl",
  "tera",
