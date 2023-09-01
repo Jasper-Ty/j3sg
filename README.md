@@ -12,7 +12,7 @@ It's (maybe) up at [jasperty.net](https://jasperty.net).
 - [x] Projects page
 - [x] Proper templates with Tera
 - [x] Hot reloading
-- [ ] Use `notify_debouncer_mini`
-- [ ] Use logger middleware 
+- [x] Use `notify_debouncer_full`
+- [x] Use logger middleware 
 - [ ] Session 
 - [ ] Blog
