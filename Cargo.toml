@@ -20,7 +20,7 @@ tera = "1"
 # Filesystem watching for live reload
 actix = "0.13.0"
 actix-web-actors = "4.1"
-notify = "6.1.1"
+notify-debouncer-full = "0.3.1"
 
 # Utils
 lazy_static = "1.4.0"

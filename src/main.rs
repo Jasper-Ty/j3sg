@@ -1,11 +1,13 @@
 use std::error::Error;
-use log::{ info, debug, error };
+use std::time::Duration;
+use log::{ info, debug };
 use env_logger::Env;
 
 use actix_files as fs;
 use actix_web::{ middleware::Logger, web, App, HttpServer };
 use openssl::ssl::{ SslAcceptor, SslFiletype, SslMethod };
-use notify::{ Watcher, RecursiveMode };
+use notify_debouncer_full::{ notify, new_debouncer, DebounceEventResult };
+use notify::Watcher;
 
 use jty_website::state::{ AppState, ADDRS };
 use jty_website::config::Config;
@@ -30,26 +32,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let data = web::Data::new(AppState::new(dev_mode));
 
     let watcher_data = data.clone();
-    let mut watcher = notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
-        let event = res.unwrap();    
-        if event.kind.is_modify() {
-            info!(target:"watcher", "Change detected. Reloading templates...");
-            let mut tera = watcher_data.tera.lock().unwrap();
- 
-            match (*tera).full_reload() {
-                Ok(_) => {
-                    info!(target:"watcher", "Successfully reloaded");
-                    let addrs = ADDRS.lock().unwrap();
-                    for addr in addrs.iter() {
-                        addr.do_send(ReloadMessage);
-                    }
-                },
-                Err(e) => println!("{}", e.to_string()),
-            };
+
+    let timeout = Duration::from_secs(1);
+    let mut debouncer = new_debouncer(timeout, None, move |res: DebounceEventResult| {
+        if let Ok(events) = res {
+            if events.iter()
+                .any(|e| matches!(e.event.kind, 
+                                  notify::EventKind::Modify(_)
+                                  | notify::EventKind::Create(_)
+                                  | notify::EventKind::Remove(_)
+                                  )
+                     )
+            {
+                info!(target:"watcher", "Change detected. Reloading templates...");
+                let mut tera = watcher_data.tera.lock().unwrap();
+     
+                match (*tera).full_reload() {
+                    Ok(_) => {
+                        info!(target:"watcher", "Successfully reloaded templates.");
+                        let addrs = ADDRS.lock().unwrap();
+                        for addr in addrs.iter() {
+                            addr.do_send(ReloadMessage);
+                        }
+                    },
+                    Err(e) => println!("{}", e.to_string()),
+                };
+            }
         }
     })?;
 
-    watcher.watch(std::path::Path::new(pages_path), RecursiveMode::Recursive)?;
+    debouncer.watcher().watch(std::path::Path::new(pages_path), notify::RecursiveMode::Recursive)?;
 
     let http_server = HttpServer::new(move || {
         App::new()
