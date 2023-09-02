@@ -14,6 +14,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="/static/stylesheet.css">
 
+        {% block scripts %}
+
+        {% endblock scripts %}
+
         {% if dev_mode %}
         <script src="/static/script/reload.js"></script>
         {% endif %}
