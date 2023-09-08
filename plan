@@ -1,0 +1,26 @@
+uh
+
+context:
+- front stuff
+- tree
+
+copy zola: pages and groups 
+filesystem based groups?
+
+struct Page {
+    String title,
+    String template,
+    String link,
+    String created_at,
+    String updated_at,
+    String content,
+}
+
+struct Group {
+    String title,
+    pages: Vec<&Page>,
+}
+
+page context:
+ - front matter
+ - group

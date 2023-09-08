@@ -1,0 +1,50 @@
+:root {
+    --main-bg-color: #1B032F;
+    --main-fg-color: #FF00A7;
+}
+
+@font-face {
+    font-family: 'mononoki-regular';
+    src: url(/static/woff/mononoki-Regular.woff);
+}
+@font-face {
+    font-family: 'mononoki-italic';
+    src: url(/static/woff/mononoki-Italic.woff);
+}
+@font-face {
+    font-family: 'mononoki-bold';
+    src: url(/static/woff/mononoki-Bold.woff);
+}
+@font-face {
+    font-family: 'mononoki-bolditalic';
+    src: url(/static/woff/mononoki-BoldItalic.woff);
+}
+
+body {
+    margin: auto;
+    padding: 40px;
+    max-width: 600px;
+    line-height: 1.6;
+    font-family: 'mononoki-regular', monospace; 
+    font-size: 18px;
+    background-color: var(--main-bg-color);
+    color: var(--main-fg-color);
+}
+
+h1, h2, h3 {
+    line-height: 1.2;
+    font-family: 'mononoki-bold';
+}
+
+a {
+    color: var(--main-fg-color);
+}
+
+hr {
+    border: 1px solid var(--main-fg-color);
+}
+
+.imglink {
+    line-height: 0; 
+}
+

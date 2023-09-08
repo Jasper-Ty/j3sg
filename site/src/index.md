@@ -1,5 +1,5 @@
 ---
-title: index
+title: Index
 template: base-1.html
 ---
 

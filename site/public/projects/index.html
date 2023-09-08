@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Projects</title>
+
+        <meta name="author" content="Jasper Ty">
+        <meta name="description" content="Personal website / portfolio / blog for Jasper Ty">
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/static/stylesheet.css">
+
+        
+    </head>
+
+    <body>
+        <nav>
+            <h1>jasper ty</h1>
+            <a href="/">Home</a> 
+            <a href="/projects">Projects</a> 
+            <a href="/art">Art</a> 
+            <a href="/music">Music</a> 
+            <a href="/notes">Notes</a>
+            <a href="/blog">Blog</a> 
+        </nav> 
+        <main>
+            <h1>Projects</h1>
+<p>This is a non-exhaustive list of personal projects I've done.</p>
+<h2>jqoiview</h2>
+<div>
+    <a class="imglink" href="/static/img/jqoiview.png" target="_blank" width="100%">
+        <img src="/static/img/jqoiview.png" width="100%">
+    </a>
+</div>
+<p>Program written in Rust for viewing the highly efficient <a href="https://qoiformat.org/">QOI</a> image format. Uses SDL2.</p>
+<p><a href="https://github.com/Jasper-Ty/jqoiview">Source</a> <a href="https://crates.io/crates/jqoiview">crates.io</a></p>
+<h2>dither_{png,bmp}</h2>
+<div style="display: flex;">
+    <a class="imglink" href="/static/img/santorini.png" target="_blank" width="50%">
+        <img src="/static/img/santorini.png" width="100%">
+    </a>
+    <a class="imglink" href="/static/img/santorini_dithered.png" target="_blank" width="50%">
+        <img src="/static/img/santorini_dithered.png" width="100%">
+    </a>
+</div>
+<div>
+    <a class="imglink" href="/static/img/your_name_dithered.bmp" target="_blank" width="100%">
+        <img src="/static/img/your_name_dithered.bmp" width="100%">
+    </a>
+</div>
+<p>Simple command-line programs, written in C (dither_png) and Rust (dither_bmp) that take in an input image and produces a dithered output image.</p>
+<p><a href="https://github.com/Jasper-Ty/dither_png">Source (dither_png)</a> <a href="https://github.com/Jasper-Ty/dither_bmp">Source (dither_bmp)</a></p>
+<h2>j3sg</h2>
+<p>Stands for <em>Jasper's Simple Static Site Generator</em>. This site runs on it.</p>
+<p><a href="https://github.com/Jasper-Ty/jty-website">Source</a></p>
+<h2>rustsweeper</h2>
+<div>
+    <a class="imglink" href="/static/img/rustsweeper.png" target="_blank" width="100%">
+        <img src="/static/img/rustsweeper.png" width="100%">
+    </a>
+</div>
+<p>Work-in-progress clone of Minesweeper written in Rust. At the moment, it's using SDL2, but I may move it to <a href="https://bevyengine.org/">Bevy</a>. Someday I hope it reaches feature parity with <a href="https://minesweepergame.com/download/arbiter.php">Minesweeper Arbiter</a> (the currently standard Minesweeper clone)</p>
+<p><a href="https://github.com/Jasper-Ty/rustsweeper">Source</a></p>
+<h2>wordle solver</h2>
+<div>
+    <a class="imglink" href="/static/img/wordlesolver.png" target="_blank" width="100%">
+        <img src="/static/img/wordlesolver.png" width="100%">
+    </a>
+</div>
+<p>Back when wordle was a craze, I quickly cooked up a solver for it in Python, basing it off of how Donald Knuth proved Mastermind can be solved in at most 5 moves using a maxmin algorithm. (Mastermind is one of my favorite puzzles).</p>
+<p>It is hilariously slow due to the naiveness of both approach and implementation. I wrote an optimized version in C at some point, but the code for that is lost to time.</p>
+<p><a href="/static/misc/wordle_cmdline_solver.py">Source</a></p>
+
+        </main>
+    </body>
+</html>
