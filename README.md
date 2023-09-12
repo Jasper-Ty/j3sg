@@ -72,6 +72,13 @@ title: The page's title
 template: The template file used to render the page
 date: (DOES NOT WORK YET) 
 content: The content of the .md file, rendered to HTML 
+index: Whether or not this page is a index.md file
+```
+
+So, for example, to render the page's title as a header,
+
+```
+<h1>{{ page.title }}</h1>
 ```
 
 To set the title, template, and date, each Markdown file must have a *front matter*, which is a YAML block delimited by two fences as follows
@@ -86,6 +93,16 @@ date: (DOES NOT WORK YET)
 # Index
 
 ... rest of markdown ...
+```
+
+In addition to the `page` object, there is also a `section` object accessible, which contains a property `pages` that contains all the other pages in the same directory as the current page. For example, to render links to posts in a blog folder
+
+```
+{% for post in section.pages %}
+    {% if not post.index %}
+        <p>{{ post.date }} <a href="{{ post.uri }}">{{ post.title }}</a></p>
+    {% endif %}
+{% endfor %}
 ```
 
 ### Serve
