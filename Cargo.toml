@@ -1,5 +1,6 @@
 [workspace]
 members = [
-    "generator",
-    "server",
+    "j3sg-gen",
+    "j3sg-serve",
+    "j3sg",
 ]
