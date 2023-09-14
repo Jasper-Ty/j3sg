@@ -9,14 +9,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     
     let src_dir = Path::new("src");
-    let _static_dir = Path::new("static");
+    let static_dir = Path::new("static");
     let out_dir = Path::new("public");
     let template_dir = Path::new("templates");
 
     let verb = match args.get(1) {
         Some(s) => { match &s[..] {
             "gen" | "generate" | "G" => Verb::Generate,
-            "serve" | "S" => Verb::Serve {
+            "init" | "initialize" | "I" => Verb::Init,
+            "srv" | "serve" | "S" => Verb::Serve {
                 bind: "127.0.0.1:5000".to_string(),
                 tls: None
             },
@@ -31,6 +32,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         Verb::Serve { bind, tls } => {
             j3sg_serve::serve(bind, tls).await?;
+        }
+        Verb::Init => {
+            j3sg_gen::init(src_dir, out_dir, template_dir, static_dir)?;
         }
         Verb::Help => {
             println!("USAGE: j3sg COMMAND");
@@ -52,5 +56,6 @@ enum Verb {
         bind: String,
         tls: Option<(String, String)>,
     },
+    Init,
     Help,
 }
