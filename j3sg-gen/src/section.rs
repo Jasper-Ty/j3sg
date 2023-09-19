@@ -12,6 +12,7 @@ use serde_yaml::Value;
 
 #[derive(Debug, Serialize)]
 pub struct Section {
+    pub parent: Option<Uri>,
     pub uri: Uri,
     pub title: String,
     pub index: Option<Page>,
@@ -42,8 +43,10 @@ impl Section {
             uri.clone(),
             src.join("index.md"),
         ).ok();
+        let parent = uri.parent();
 
         let section = Self {
+            parent,
             uri,
             title: parse.title.unwrap_or(file_name(src)?),
             index,
@@ -65,7 +68,6 @@ impl SectionMap {
         let sections = &sitemap.sections;
         for (uri, src) in sections {
             let section = Section::new(&sitemap, uri.clone(), src)?;
-            println!("{:?}\n  {:?}\n  {:?}", section.uri, section.subsections, section.pages);
             map.insert(uri.clone(), section);
         }
         Ok(Self(map))

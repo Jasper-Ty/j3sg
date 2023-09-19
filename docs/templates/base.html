@@ -1,0 +1,17 @@
+<html lang="en">
+    <head>
+        <title>{{ page.title }}</title>
+
+        {% if page.author %}
+        <meta name="author" content="{{ page.author }}">
+        {% endif %}
+
+        {% if page.description %}
+        <meta name="description" content="{{ page.description }}">
+        {% endif %}
+    </head>
+
+    <body>
+        {{ page.content }}
+    </body>
+</html>

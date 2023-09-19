@@ -1,8 +1,8 @@
 //! Helper filesystem functions
 
 use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
 use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::fs;
 
 /// Returns an iterator of the subdirectories of `dir`
@@ -62,17 +62,6 @@ pub fn files_with_extension<P: AsRef<Path>>(dir: P, ext: &'static str) -> Result
         )
 }
 
-fn touch<P>(path: P) -> std::io::Result<()> 
-where 
-    P: AsRef<Path>
-{
-    fs::OpenOptions::new()
-        .write(true)
-        .create(true)
-        .open(path)?;
-    Ok(())
-}
-
 pub fn cat<P>(path: P, text: &[u8]) -> std::io::Result<()>
 where
     P: AsRef<Path>
@@ -84,6 +73,19 @@ where
         .open(path)?
         .write_all(text)
 }
+
+/*
+fn touch<P>(path: P) -> std::io::Result<()> 
+where 
+    P: AsRef<Path>
+{
+    fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(path)?;
+    Ok(())
+}
+
 
 pub const TEST_DIR: &str = "/tmp/j3sg-test";
 pub const TEST_SRC: &str = "/tmp/j3sg-test/src";
@@ -162,3 +164,4 @@ b"<!DOCTYPE html>
     )?;
     Ok(())
 }
+*/

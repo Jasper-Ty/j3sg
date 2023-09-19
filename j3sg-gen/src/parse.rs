@@ -47,9 +47,6 @@ impl Parse {
     }
 }
 
-fn fr () -> bool { true }
-fn cap () -> bool { false }
-
 #[derive(Debug, Deserialize)]
 struct FrontMatter {
     title: Option<String>,
@@ -57,21 +54,16 @@ struct FrontMatter {
     description: Option<String>,
     template: Option<String>,
 
-    #[serde(default="fr")]
-    render: bool,
-
     #[serde(flatten)]
     extra: HashMap<String, Value>, 
 }
 impl Default for FrontMatter {
     fn default() -> Self {
-        cap();
         Self {
             title: None,
             author: None,
             description: None,
             template: None,
-            render: false,
             extra: HashMap::new(),
         }
     }

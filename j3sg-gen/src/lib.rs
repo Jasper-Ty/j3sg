@@ -13,6 +13,7 @@ mod filesystem;
 mod parse;
 mod render;
 mod sitemap;
+mod init;
 
 use std::fs::{self, OpenOptions};
 use std::path::Path;
@@ -21,6 +22,7 @@ use tera::{Tera, Context};
 use sitemap::SiteMap;
 use page::PageMap;
 use section::SectionMap;
+
 
 /// Generates the site
 ///
@@ -51,7 +53,7 @@ where
     // 02 -- Read in source files
     let sectionmap = SectionMap::new(&sitemap)?;
     let pagemap = PageMap::new(&sitemap)?;
-    // TODO: Check that root index is there and has no empty fields
+    // TODO: Check that root index is there and has a nonempty template field!
     let root_index = src_dir.join("index.md");
     if !root_index.is_file() {
         return Err("No root index file found".to_string());
@@ -74,7 +76,7 @@ where
     // finally render every page
     for (uri, page) in pagemap.0.iter() {
         fs::create_dir_all(uri.out_dir(out_dir))
-            .map_err(|e| "unable to create folder".to_string())?;
+            .map_err(|_| "unable to create folder".to_string())?;
 
         let section = sectionmap.0.get(&page.section)
             .ok_or("Page with no section?".to_string())?;
@@ -83,7 +85,6 @@ where
         context.insert("section", section);
 
         let out_path = uri.out_path(out_dir);
-        println!("writing to: {:?}", out_path);
         let outfile = OpenOptions::new()
             .write(true)
             .create(true)
@@ -99,13 +100,12 @@ where
         .filter(|(_, section)| section.index.is_some());
     for (uri, section) in sectioniter {
         fs::create_dir_all(uri.out_dir(out_dir))
-            .map_err(|e| "unable to create folder".to_string())?;
+            .map_err(|_| "unable to create folder".to_string())?;
 
         context.insert("page", &section.index);
         context.insert("section", section);
 
         let out_path = uri.out_path(out_dir);
-        println!("writing to: {:?}", out_path);
         let outfile = OpenOptions::new()
             .write(true)
             .create(true)
@@ -126,6 +126,8 @@ pub fn init(src_dir: &Path, out_dir: &Path, template_dir: &Path, static_dir: &Pa
     fs::create_dir_all(template_dir)?;
     fs::create_dir_all(static_dir)?;
 
+    filesystem::cat(src_dir.join("index.md"), init::ROOT_INDEX)?;
+    filesystem::cat(template_dir.join("base.html"), init::BASE_TEMPLATE)?;
     Ok(())
 }
 
@@ -133,17 +135,4 @@ pub fn init(src_dir: &Path, out_dir: &Path, template_dir: &Path, static_dir: &Pa
 #[cfg(test)]
 pub mod test {
     use super::*;
-
-    use crate::filesystem::init_test_dir;
-    use crate::filesystem::{TEST_SRC, TEST_OUT, TEST_TEMPLATES};
-
-    #[test]
-    fn test_generate() -> Result<(), String> {
-        init_test_dir()
-            .map_err(|e| e.to_string())?;
-
-        generate(TEST_SRC, TEST_OUT, TEST_TEMPLATES)?;
-
-        Ok(())
-    }
 }

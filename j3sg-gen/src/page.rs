@@ -61,7 +61,6 @@ impl PageMap {
                     page_uri.clone(),
                     section_uri.clone(),
                     src)?;
-                println!("page: {:?}", page);
                 map.insert(page_uri.clone(), page);
             }
         }

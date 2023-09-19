@@ -1,9 +1,9 @@
 //! A struct which holds the generated site's structure
 //!
+//! List of errors:
 
 use crate::filesystem::{file_name, file_stem, files_with_extension, has_file, subdirs};
 use crate::uri::Uri;
-use serde::Serialize;
 use colored::*;
 
 use std::path::{Path, PathBuf};
@@ -111,74 +111,6 @@ impl SiteMap {
 
     pub fn print_tree(&self) {
         self.draw_uri_tree(&Uri::new(), 0);
-    }
-}
-
-#[derive(Debug, Serialize)]
-pub struct SiteNode {
-    pub uri: Uri,
-    pub src: PathBuf,
-}
-impl SiteNode {
-    pub fn new<P>(src: P) -> Self 
-    where
-        P: AsRef<Path>
-    {
-        let uri = Uri::new();
-        let src = src.as_ref().to_owned();
-        Self {
-            uri,
-            src,
-        }
-    }
-
-    fn new_child<P>(&self, src: P) -> Result<Self, String>
-    where
-        P: AsRef<Path>
-    {
-        let uri = self.uri.join(file_name(&src)?)?;
-        let src = src.as_ref().to_owned();
-        Ok(Self {
-            uri,
-            src,
-        })
-    }
-
-    pub fn pages(&self) -> Result<Vec<Self>, String> {
-        let src = &self.src;
-        let mut pages: Vec<SiteNode> = files_with_extension(src, "md")?
-            .filter_map(|path| self.new_child(path).ok())
-            .collect();
-
-        let mut stack: Vec<PathBuf> = subdirs(src)?.collect();
-        while let Some(subdir) = stack.pop() {
-            if !has_file(&subdir, "index.md")? {
-                stack.extend(subdirs(&subdir)?);
-                pages.extend(files_with_extension(&subdir, "md")?
-                             .filter_map(|path| self.new_child(path).ok()));
-            }
-        }
-        Ok(pages)
-    }
-
-    pub fn subsections(&self) -> Result<Vec<Self>, String> {
-        let mut subsections = Vec::new();
-        let mut stack: Vec<PathBuf> = subdirs(&self.src)?.collect();
-
-        while let Some(subdir) = stack.pop() {
-            if has_file(&subdir, "index.md")? {
-                let uri = self.uri.join(file_name(&subdir)?)?;
-                let src = subdir.to_owned();
-                subsections.push(Self {
-                    uri, 
-                    src,
-                })
-            } else {
-                stack.extend(subdirs(subdir)?);
-            }
-        }
-            
-        Ok(subsections)
     }
 }
 

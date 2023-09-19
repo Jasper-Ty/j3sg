@@ -1,4 +1,17 @@
 //! A wrapper around PathBuf that represents valid URIs 
+//!
+//! This is used to index pages and sections in j3sg--
+//! values in the global `SECTION_MAP` and `PAGE_MAP` objects
+//! are indexed by their corresponding Uri.
+//!
+//! In addition, a URI also uniquely determines an output file path,
+//! given a base output directory, given by.
+//!
+//! ```
+//! out_dir + uri + "index.html"
+//! ```
+//!
+//! where `+` denotes joining paths together
 
 use colored::*;
 use std::path::{Path, PathBuf, Component};
@@ -14,11 +27,26 @@ use serde::{Serialize, Serializer};
 /// - Hyphens, underscores, and dots
 ///
 /// Furthermore, segments may never be ".." or "." 
+///
+/// Internally, a Uri is a non-absolute PathBuf. 
+/// (Because it's easier to make a non-absolute path absolute than the other way around)
 #[derive(Clone)]
 pub struct Uri(PathBuf);
-
 impl Uri {
-    /// Validates if a path can be a valid part of a URI
+    /// Helper function which validates if a path would make a valid internal
+    /// PathBuf for a Uri
+    ///
+    /// Specifically, it follows the rules:
+    /// * It must be non-absolute
+    /// * It must not contain current or parent directory components,
+    /// i.e no path segments of the form ".." or "."
+    /// * Path segments must use only the following ASCII characters
+    ///     * Alphanumeric characters
+    ///     * Hyphens, underscores, or periods
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path to validate
     fn valid_path<P>(path: P) -> bool 
     where
         P: AsRef<Path>
@@ -40,20 +68,18 @@ impl Uri {
             })
     }
 
-    /// Creates a new URI from a given source file and source directory
-    ///
-    /// Will return None if the src_dir cannot be stripped from src or
-    /// if the resulting URI contains illegal characters
-    /// 
-    /// # Arguments
-    /// 
-    /// * `src` - The path of the source file
-    /// * `src_dir` - The path of the source directory
+    /// Creates a new root URI, `/`
     pub fn new() -> Self {
         Self(PathBuf::new())
     }
 
-    /// Generates the path to the output directory
+    /// Generates the path to the output directory which would
+    /// contain the .html file this Uri serves
+    ///
+    /// TODO: fix this unfortunate naming
+    ///
+    /// # Arguments
+    /// * `out_dir` - The path of the output directory
     pub fn out_dir<P>(&self, out_dir: P) -> PathBuf 
     where 
         P: AsRef<Path>
@@ -81,10 +107,17 @@ impl Uri {
     pub fn parent(&self) -> Option<Uri> {
         self.0.parent().map(|path| Uri(path.to_owned()))
     }
+    
+    /// Returns a vector of ancestors
+    pub fn ancestors(&self) -> Vec<Self> {
+        todo!();
+    }
 
     /// Returns a new Uri joined with the given path 
     ///
     /// # Arguments
+    ///
+    /// * `path` - The path to be joined to this Uri
     pub fn join<P>(&self, path: P) -> Result<Uri, String> 
     where
         P: AsRef<Path>
@@ -97,13 +130,15 @@ impl Uri {
         }
     }
 
-    pub fn is_empty(&self) -> bool {
+    /// Whether or not this Uri is the root uri, `/`
+    pub fn is_root(&self) -> bool {
         let path = self.0.as_path();
         path.parent() == None
     }
 
+    /// Returns the last segment of this Uri
     pub fn file_name(&self) -> String {
-        if self.is_empty() {
+        if self.is_root() {
             String::new()
         } else {
             self.0.file_name().unwrap()
@@ -115,12 +150,12 @@ impl Uri {
 
 impl fmt::Display for Uri {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_empty() {
+        if self.is_root() {
             write!(f, "/")?;
         } else {
             let path = self.0.as_path();
             for segment in path {
-                write!(f, "/{}", segment.to_str().unwrap())?;
+                write!(f, "/{}", segment.to_str().unwrap().purple())?;
             }
         }
         Ok(())
@@ -208,20 +243,5 @@ pub mod test {
         buf.push("bar");
 
         assert!(!Uri::valid_path(buf));
-    }
-
-    #[test]
-    fn serialize() -> Result<(), String> {
-        let uri = Uri::new()
-            .join("foo")?
-            .join("bar")?
-            .join("baz")?;
-        let yaml = serde_yaml::to_string(&uri)
-            .map_err(|e| e.to_string())?;
-
-        Ok(())
-    }
-    #[test]
-    fn outfile() {
     }
 }
